@@ -1,24 +1,21 @@
 async function get_visitors() {
     try {
-        let response = await fetch('https://1l3i8r39t1.execute-api.us-east-1.amazonaws.com/Prod/visitor-count', {
-            method: 'GET',
-        });
+        let response = await fetch('https://1l3i8r39t1.execute-api.us-east-1.amazonaws.com/Prod/visitor-count');
 
-        let data = await response.json();
+        let data = await response.json(); // Parse JSON
 
-        console.log("Raw API Response:", data); // Debugging line
+        console.log("Raw API Response:", data); // Debugging log
 
-        // Parse the "body" field which is a JSON string
-        let bodyData = JSON.parse(data.body);
-
-        console.log("Parsed Body Data:", bodyData); // Debugging line
-
-        // Extract and display visitor count
-        document.getElementById("visitors").innerHTML = bodyData["visitor-count"] || "Error";
-
-        return bodyData;
+        // ✅ Check and display visitor count properly
+        if (data["visitor-count"] !== undefined) {
+            document.getElementById("visitors").innerHTML = data["visitor-count"];
+        } else {
+            console.error("Error: `visitor-count` missing from response.");
+            document.getElementById("visitors").innerHTML = "Error fetching count";
+        }
     } catch (err) {
         console.error("Error fetching visitor count:", err);
+        document.getElementById("visitors").innerHTML = "Error";
     }
 }
 
