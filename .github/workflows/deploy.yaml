@@ -3,30 +3,44 @@ name: Deploy Frontend to S3
 on:
   push:
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - main  # Trigger when changes are pushed to the main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      # Step 1: Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-    - name: Install Dependencies
-      run: |
-        npm install
+      # Step 2: Set up Node.js (if you need Node.js to build the frontend)
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'  # Adjust the version as needed
 
-    - name: Build Frontend
-      run: |
-        npm run build
+      # Step 3: Install dependencies (if you use npm/yarn)
+      - name: Install Dependencies
+        run: |
+          npm install  # or yarn install if you're using Yarn
 
-    - name: Deploy to S3
-      run: |
-        aws s3 sync ./build/ s3://your-s3-bucket-name --delete
+      # Step 4: Build the frontend (if applicable, modify this to match your build process)
+      - name: Build Frontend
+        run: |
+          npm run build  # Replace with your actual build command if needed
+
+      # Step 5: Sync the build folder with the S3 bucket
+      - name: Sync to S3
+        run: |
+          aws s3 sync ./build/ s3://your-s3-bucket-name/ --delete  # Adjust the path and bucket name
+
+      # Step 6: Invalidate CloudFront cache (if using CloudFront for CDN)
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id YOUR_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+          
+      # Set AWS credentials using GitHub Secrets
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
