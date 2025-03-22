@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  VisitorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: visitor-function
+      Runtime: python3.9
+      Handler: app.lambda_handler
+      CodeUri: visitor_function/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: visitor-count
+      Environment:
+          Variables:
+            VISITOR_TABLE_NAME: visitor_count
+      Events:
+        VisitorAPI:
+          Type: Api
+          Properties:
+            Path: /visitor-count
+            Method: GET
+
+Outputs:
+  ApiGatewayInvokeURL:
+    Description: "API Gateway endpoint URL for the visitor function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/visitor-count"
