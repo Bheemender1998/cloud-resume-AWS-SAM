@@ -1,4 +1,4 @@
-name: Deploy SAM Application
+name: Deploy Frontend to S3
 
 on:
   push:
@@ -9,36 +9,24 @@ on:
       - main
 
 jobs:
-  test_and_deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code
     - name: Checkout Code
       uses: actions/checkout@v2
 
-    # Step 2: Set up Python
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-
-    # Step 3: Install dependencies
     - name: Install Dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        npm install
 
-    # Step 4: Run Python Tests
-    - name: Run Tests
+    - name: Build Frontend
       run: |
-        pytest tests/
+        npm run build
 
-    # Step 5: Deploy SAM Application
-    - name: Deploy SAM Application
+    - name: Deploy to S3
       run: |
-        sam build
-        sam deploy --no-confirm-changeset --capabilities CAPABILITY_IAM
+        aws s3 sync ./build/ s3://your-s3-bucket-name --delete
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
